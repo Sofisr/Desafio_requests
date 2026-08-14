@@ -39,9 +39,28 @@ const getRequests = async (filters = {}) => {
     });
 };
 
+const getRequestById = async (id) => {
+    return prisma.request.findUnique({
+        where: {
+            id: Number(id)
+        }
+    });
+};
 
+const updateRequestStatus = async (id, status) => {
+    return prisma.request.update({
+        where: {
+            id: Number(id)
+        },
+        data: {
+            status
+        }
+    });
+};
 
 module.exports = {
     createRequest,
-    getRequests
+    getRequests,
+    getRequestById,
+    updateRequestStatus
 };

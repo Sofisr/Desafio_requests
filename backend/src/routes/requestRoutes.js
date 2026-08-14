@@ -8,4 +8,8 @@ router.post("/", requestController.createRequest);
 
 router.get("/", requestController.getRequests);
 
+router.get("/:id", requestController.getRequestById);
+
+router.patch("/:id", requestController.updateRequestStatus);
+
 module.exports = router;

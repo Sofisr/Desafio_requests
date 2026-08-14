@@ -80,7 +80,66 @@ const getRequests = async (req, res) => {
     }
 };
 
+const getRequestById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const request = await requestService.getRequestById(id);
+
+        if (!request) {
+            return res.status(404).json({
+                message: "Request not found"
+            });
+        }
+
+        res.status(200).json(request);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Failed to fetch request"
+        });
+    }
+};
+
+const updateRequestStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!status || !validStatuses.includes(status)) {
+            return res.status(400).json({
+                message: "Invalid status",
+                allowedValues: validStatuses
+            });
+        }
+
+        const request = await requestService.updateRequestStatus(
+            id,
+            status
+        );
+
+        res.status(200).json(request);
+
+    } catch (error) {
+        console.error(error);
+
+        if (error.code === "P2025") {
+            return res.status(404).json({
+                message: "Request not found"
+            });
+        }
+
+        res.status(500).json({
+            message: "Failed to update request"
+        });
+    }
+};
+
 module.exports = {
     createRequest,
-    getRequests
+    getRequests,
+    getRequestById,
+    updateRequestStatus
 };
