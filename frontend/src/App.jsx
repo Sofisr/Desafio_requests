@@ -6,6 +6,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [allRequests, setAllRequests] = useState([]);
 
   const [showForm, setShowForm] = useState(false);
 
@@ -17,30 +18,36 @@ function App() {
     location: "MADEIRA",
   });
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      setError("");
+const fetchRequests = async () => {
+  try {
+    setLoading(true);
+    setError("");
 
-      const url = statusFilter
-        ? `http://localhost:3000/api/requests?status=${statusFilter}`
-        : "http://localhost:3000/api/requests";
+    const url = statusFilter
+      ? `http://localhost:3000/api/requests?status=${statusFilter}`
+      : "http://localhost:3000/api/requests";
 
-      const response = await fetch(url);
+    const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch requests");
-      }
-
-      const data = await response.json();
-      setRequests(data);
-    } catch (error) {
-      console.error(error);
-      setError("Não foi possível carregar os pedidos.");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error("Failed to fetch requests");
     }
-  };
+
+    const data = await response.json();
+    setRequests(data);
+
+    // Quando não existe filtro, aproveitamos os dados
+    // para atualizar os contadores globais.
+    if (!statusFilter) {
+      setAllRequests(data);
+    }
+  } catch (error) {
+    console.error(error);
+    setError("Não foi possível carregar os pedidos.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchRequests();
@@ -185,16 +192,19 @@ const handleStatusChange = async (requestId, newStatus) => {
                 <div className="form-group">
                   <label htmlFor="category">Categoria</label>
 
-                  <input
+                  <select
                     id="category"
                     name="category"
-                    type="text"
                     value={formData.category}
                     onChange={handleInputChange}
-                    placeholder="Ex.: IT"
                     required
-                  />
-                </div>
+                  >
+                    <option value="IT">IT</option>
+                    <option value="MAINTENANCE">Manutenção</option>
+                    <option value="EQUIPMENT">Equipamento</option>
+                    <option value="OTHER">Outro</option>
+                  </select>
+                </div>  
 
                 <div className="form-group">
                   <label htmlFor="priority">Prioridade</label>
@@ -212,19 +222,21 @@ const handleStatusChange = async (requestId, newStatus) => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="location">Localização</label>
+                <div className="form-group">
+                  <label htmlFor="location">Localização</label>
 
-                <input
-                  id="location"
-                  name="location"
-                  type="text"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  placeholder="Ex.: MADEIRA"
-                  required
-                />
-              </div>
+                  <select
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="MADEIRA">Madeira</option>
+                    <option value="PORTUGAL_MAINLAND">Portugal Continental</option>
+                    <option value="MOROCCO">Marrocos</option>
+                  </select>
+                </div>
 
               {error && <p className="error">{error}</p>}
 
@@ -245,6 +257,42 @@ const handleStatusChange = async (requestId, newStatus) => {
           </section>
         ) : (
           <>
+         <div className="dashboard-stats">
+          <div className="stat-card">
+            <span className="stat-label">Total</span>
+            <strong>{allRequests.length}</strong>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-label">Novos</span>
+            <strong>
+              {allRequests.filter((request) => request.status === "NEW").length}
+            </strong>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-label">Em curso</span>
+            <strong>
+              {
+                allRequests.filter(
+                  (request) => request.status === "IN_PROGRESS"
+                ).length
+              }
+            </strong>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-label">Resolvidos</span>
+            <strong>
+              {
+                allRequests.filter(
+                  (request) => request.status === "RESOLVED"
+                ).length
+              }
+            </strong>
+          </div>
+        </div>
+
             <div className="section-header">
               <h2>Pedidos</h2>
 
@@ -276,29 +324,47 @@ const handleStatusChange = async (requestId, newStatus) => {
                     <p>{request.description}</p>
 
                     <div className="request-info">
-                      <span>{request.category}</span>
-                      <span>{request.location}</span>
-                      <span>{request.priority}</span>
+                      <span className="info-tag category-tag">
+                        {request.category}
+                      </span>
+
+                      <span className="info-tag location-tag">
+                        {request.location}
+                      </span>
+
+                      <span className={`priority-tag priority-${request.priority.toLowerCase()}`}>
+                        {request.priority === "LOW" && "Baixa"}
+                        {request.priority === "MEDIUM" && "Média"}
+                        {request.priority === "HIGH" && "Alta"}
+                      </span>
+
+                        <span className="date-tag">
+                          {new Date(request.createdAt).toLocaleDateString("pt-PT")}
+                        </span>
+
                     </div>
                   </div>
 
                   <div className="request-status">
                     <span
-                      className={`status ${request.status.toLowerCase()}`}
+                      className={`status status-${request.status.toLowerCase()}`}
                     >
-                      {request.status}
+                      {request.status === "NEW" && "Novo"}
+                      {request.status === "IN_PROGRESS" && "Em curso"}
+                      {request.status === "RESOLVED" && "Resolvido"}
                     </span>
 
-                    <select
-                      value={request.status}
-                      onChange={(event) =>
-                        handleStatusChange(request.id, event.target.value)
-                      }
-                    >
-                      <option value="NEW">Novo</option>
-                      <option value="IN_PROGRESS">Em curso</option>
-                      <option value="RESOLVED">Resolvido</option>
-                    </select>
+                  <select
+                    className="status-select"
+                    value={request.status}
+                    onChange={(event) =>
+                      handleStatusChange(request.id, event.target.value)
+                    }
+                  >
+                    <option value="NEW">Novo</option>
+                    <option value="IN_PROGRESS">Em curso</option>
+                    <option value="RESOLVED">Resolvido</option>
+                  </select>
                   </div>      
                 </div>
               ))}
