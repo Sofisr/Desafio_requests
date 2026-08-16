@@ -55,6 +55,7 @@ The frontend and backend should be run in separate terminals.
 
 ## Backend
 cd backend
+
 npm install
 
 Create a .env file:
@@ -64,6 +65,7 @@ DATABASE_URL="your_database_connection_string"
 Run the database migrations and generate the Prisma client:
 
 npx prisma migrate dev
+
 npx prisma generate
 
 Start the development server:
@@ -79,7 +81,9 @@ http://localhost:3000
 In a second terminal:
 
 cd frontend
+
 npm install
+
 npm run dev
 
 The frontend will then be available at the URL provided by Vite.
