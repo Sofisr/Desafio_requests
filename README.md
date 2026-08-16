@@ -6,19 +6,20 @@ A small internal request management system designed for organizations operating 
 
 The application allows employees to submit requests and follow their progress, while providing a simple interface for managing their status.
 
-## Key features
+## Key Features
 
-- Create requests
-- View existing requests
-- Filter requests by status
-- Update request status
-- Track priority, category and location
-- Dashboard with request statistics
-- Persistent PostgreSQL storage
-- REST API
+* Create requests
+* View existing requests
+* Filter requests by status
+* Update request status
+* Track priority, category and location
+* Dashboard with request statistics
+* Persistent PostgreSQL storage
+* REST API
 
 ## Architecture
 
+```text
                  ┌──────────────────┐
                  │   React + Vite   │
                  │    Frontend      │
@@ -37,64 +38,101 @@ The application allows employees to submit requests and follow their progress, w
                  │   PostgreSQL     │
                  │    Supabase      │
                  └──────────────────┘
+```
 
 ## Requirements
 
-Node.js
-npm
-PostgreSQL database or Supabase project
-Running locally
+* Git
+* Node.js
+* npm
+* PostgreSQL database or Supabase project
+
+## Installation
 
 Clone the repository:
 
+```bash
 git clone https://github.com/Sofisr/Desafio_requests.git
-
 cd Desafio_requests
+```
 
 The frontend and backend should be run in separate terminals.
 
-## Backend
+### Backend
+
+In the first terminal:
+
+```bash
 cd backend
-
 npm install
+```
 
-Create a .env file:
+### Environment Variables
 
-DATABASE_URL="your_database_connection_string"
+Create a `.env` file inside the `backend` folder:
 
-Run the database migrations and generate the Prisma client:
+```env
+DATABASE_URL="postgresql://username:password@host:5432/postgres"
+```
 
-npx prisma migrate dev
+Replace the example value with your actual PostgreSQL connection string.
 
+If using Supabase:
+
+1. Open your Supabase project.
+2. Go to **Project Settings → Database**.
+3. Copy the PostgreSQL connection string.
+4. Add it as the value of `DATABASE_URL`.
+
+Do not commit the `.env` file to the repository.
+
+### Database Setup
+
+Generate the Prisma Client and run the database migrations:
+
+```bash
 npx prisma generate
+npx prisma migrate dev
+```
 
-Start the development server:
+### Start the Backend
 
+```bash
 npm run dev
+```
 
 The API will be available at:
 
+```text
 http://localhost:3000
+```
 
-## Frontend
+### Frontend
 
 In a second terminal:
 
+```bash
 cd frontend
-
 npm install
-
 npm run dev
+```
 
-The frontend will then be available at the URL provided by Vite.
+The frontend will be available at the URL provided by Vite, usually:
+
+```text
+http://localhost:5173
+```
 
 ## API
-Method	Endpoint	Description
-GET	/api/requests	List requests
-GET	/api/requests?status=NEW	Filter requests by status
-POST	/api/requests	Create request
-PATCH	/api/requests/:id	Update request
-Status
+
+| Method | Endpoint                   | Description               |
+| ------ | -------------------------- | ------------------------- |
+| GET    | `/api/requests`            | List requests             |
+| GET    | `/api/requests?status=NEW` | Filter requests by status |
+| POST   | `/api/requests`            | Create request            |
+| PATCH  | `/api/requests/:id`        | Update request status     |
+
+## Scope
 
 Functional prototype completed within the challenge timeframe.
 
